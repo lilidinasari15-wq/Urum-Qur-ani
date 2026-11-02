@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Bacaan Al-Qur'an Kepsek - Kec. Lut Tawar</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- ExcelJS Library for embedding real images in XLSX export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <!-- FileSaver Library to save generated blob files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <!-- Google Fonts: Amiri & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        },
+                        gold: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        arabic: ['Amiri', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .quran-pattern {
+            background-color: #047857;
+            background-image: radial-gradient(#059669 0.75px, transparent 0.75px), radial-gradient(#059669 0.75px, #047857 0.75px);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; color: black !important; }
+            .shadow-lg, .shadow-md, .shadow-sm, .shadow { box-shadow: none !important; }
+            .print-photo { max-height: 80px !important; width: auto !important; object-fit: contain !important; border: 1px solid #ccc !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen flex flex-col text-slate-800">
+
+    <!-- Header Section -->
+    <header class="quran-pattern text-white shadow-md relative no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center space-x-4 text-center md:text-left">
+                    <div class="bg-emerald-800/80 p-3 rounded-2xl border border-emerald-500/30 shadow-inner">
+                        <i class="fa-solid fa-[#000] fa-book-quran text-3xl text-amber-300"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold tracking-wider text-emerald-200 uppercase">Kecamatan Lut Tawar</span>
+                        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white">Laporan Bacaan Al-Qur'an Kepala Sekolah</h1>
+                        <p class="text-xs text-emerald-100 mt-0.5">Pencatatan, Dokumentasi Foto & Rekapitulasi 11 Sekolah</p>
+                    </div>
+                </div>
+
+                <!-- Status Login / User Badge -->
+                <div id="authStatusBadge" class="hidden flex items-center bg-emerald-900/80 px-4 py-2 rounded-xl border border-emerald-500/40">
+                    <div class="text-right mr-3">
+                        <p id="badgeSchoolName" class="text-sm font-semibold text-amber-300">SDN 1 Lut Tawar</p>
+                        <p id="badgeRole" class="text-xs text-emerald-200">Kepala Sekolah</p>
+                    </div>
+                    <button onclick="logoutSchool()" class="bg-red-500/20 hover:bg-red-500/40 text-red-200 p-2 rounded-lg transition-colors text-xs flex items-center gap-1" title="Keluar">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Keluar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="bg-emerald-900/60 border-t border-emerald-600/40 backdrop-blur-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-2">
+                <button id="tabInputBtn" onclick="switchTab('input')" class="px-5 py-3 text-sm font-medium text-amber-300 border-b-2 border-amber-400 flex items-center space-x-2 transition-all">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span>Input Laporan & Foto</span>
+                </button>
+                <button id="tabRecapBtn" onclick="switchTab('recap')" class="px-5 py-3 text-sm font-medium text-emerald-200 hover:text-white border-b-2 border-transparent flex items-center space-x-2 transition-all">
+                    <i class="fa-solid fa-chart-column"></i>
+                    <span>Rekap Laporan & Dokumentasi</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- Banner Sync Status / Connection Notification -->
+        <div id="syncNotification" class="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 flex items-center justify-between shadow-sm no-print">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-circle-notch fa-spin text-blue-600" id="syncSpinner"></i>
+                <div>
+                    <p class="text-sm font-semibold" id="syncStatusTitle">Menghubungkan ke Server Cloud...</p>
+                    <p class="text-xs text-blue-600" id="syncStatusDesc">Data & foto tersinkronisasi online antar sekolah di Kecamatan Lut Tawar.</p>
+                </div>
+            </div>
+            <span class="text-xs bg-blue-100 text-blue-700 font-medium px-2.5 py-1 rounded-full border border-blue-300">Live Database</span>
+        </div>
+
+        <!-- ================= TAB 1: FORM INPUT LAPORAN ================= -->
+        <section id="sectionInput" class="space-y-6">
+
+            <!-- PIN Login Modal / Access Lock Box (Jika belum login) -->
+            <div id="schoolAuthCard" class="bg-white rounded-2xl shadow-lg border border-slate-200/80 p-6 sm:p-8 max-w-lg mx-auto">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
+                        <i class="fa-solid fa-school-lock text-2xl"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-800">Pilih Sekolah & Masukkan PIN</h2>
+                    <p class="text-xs text-slate-500 mt-1">Silakan pilih sekolah Anda dan masukkan kode PIN akses resmi kepala sekolah.</p>
+                </div>
+
+                <form id="authForm" onsubmit="handleSchoolLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Nama Sekolah</label>
+                        <select id="authSchoolSelect" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white">
+                            <option value="" disabled selected>-- Pilih Sekolah --</option>
+                            <option value="SDN 1 Lut Tawar">SDN 1 Lut Tawar</option>
+                            <option value="SDN 2 Lut Tawar">SDN 2 Lut Tawar</option>
+                            <option value="SDN 3 Lut Tawar">SDN 3 Lut Tawar</option>
+                            <option value="SDN 4 Lut Tawar">SDN 4 Lut Tawar</option>
+                            <option value="SDN 5 Lut Tawar">SDN 5 Lut Tawar</option>
+                            <option value="SDN 6 Lut Tawar">SDN 6 Lut Tawar</option>
+                            <option value="SDN 7 Lut Tawar">SDN 7 Lut Tawar</option>
+                            <option value="SDN 8 Lut Tawar">SDN 8 Lut Tawar</option>
+                            <option value="SDN 9 Lut Tawar">SDN 9 Lut Tawar</option>
+                            <option value="SDN 10 Lut Tawar">SDN 10 Lut Tawar</option>
+                            <option value="SD Yayasan Pendidikan Islam">SD Yayasan Pendidikan Islam</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Kode Akses / PIN</label>
+                        <div class="relative">
+                            <input type="password" id="authPinInput" placeholder="Masukkan Kode PIN (Contoh: 1001)" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm pl-10 font-mono tracking-widest">
+                            <i class="fa-solid fa-key absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1">Default PIN: SDN 1 = 1001, SDN 2 = 1002, ..., SD YPI = 1011</p>
+                    </div>
+
+                    <div id="authErrorMessage" class="hidden p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-xs flex items-center space-x-2">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span id="authErrorText">PIN salah! Silakan periksa kembali kode akses Anda.</span>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md transition-all flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                        <span>Masuk ke Form Laporan</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Form Laporan Bacaan + Upload Foto (Tampil setelah Login) -->
+            <div id="reportFormContainer" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Form Input Left Column (2 Cols) -->
+                <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                    <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                                <i class="fa-solid fa-[#000] fa-book-open"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-slate-800">Form Laporan & Dokumentasi Bacaan</h3>
+                                <p class="text-xs text-slate-500">Isi perkembangan bacaan dan lampirkan foto dokumentasi kegiatan.</p>
+                            </div>
+                        </div>
+                        <span id="activeSchoolTag" class="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-semibold rounded-full border border-amber-300">SDN 1 Lut Tawar</span>
+                    </div>
+
+                    <form id="readingReportForm" onsubmit="submitReport(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Bacaan / Laporan</label>
+                                <input type="date" id="inputDate" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Kepala Sekolah / Pelapor</label>
+                                <input type="text" id="inputReporterName" placeholder="Nama Kepala Sekolah..." required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Juz Ke-</label>
+                                <select id="inputJuz" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm">
+                                    <!-- Populated dynamic Javascript 1-30 -->
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Surah</label>
+                                <input type="text" id="inputSurah" list="surahSuggestions" placeholder="Contoh: Al-Baqarah" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm">
+                                <datalist id="surahSuggestions">
+                                    <option value="Al-Fatihah"><option value="Al-Baqarah"><option value="Ali 'Imran"><option value="An-Nisa'"><option value="Al-Ma'idah">
+                                    <option value="Al-An'am"><option value="Al-A'raf"><option value="Al-Anfal"><option value="At-Taubah"><option value="Yunus">
+                                    <option value="Yasin"><option value="Ar-Rahman"><option value="Al-Waqi'ah"><option value="Al-Mulk"><option value="An-Naba'">
+                                </datalist>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Cakupan Ayat (Mulai - Selesai)</label>
+                                <input type="text" id="inputAyatRange" placeholder="Contoh: Ayat 1 - 50" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Halaman Al-Qur'an (Opsional)</label>
+                                <input type="text" id="inputPageRange" placeholder="Contoh: Hal 15 - 20" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm">
+                            </div>
+                        </div>
+
+                        <!-- Upload Photo Section -->
+                        <div class="pt-2">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Foto Dokumentasi Kegiatan Membaca Al-Qur'an</label>
+                            <div class="mt-1 flex justify-center px-4 py-4 border-2 border-slate-300 border-dashed rounded-xl hover:border-emerald-500 transition-colors bg-slate-50">
+                                <div class="space-y-2 text-center" id="uploadDropArea">
+                                    <div id="photoPreviewContainer" class="hidden mb-2 relative inline-block">
+                                        <img id="photoPreviewImg" src="" alt="Pratinjau Foto" class="h-36 w-auto rounded-lg shadow-sm border border-slate-200 object-cover">
+                                        <button type="button" onclick="removeSelectedPhoto()" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow hover:bg-red-600">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                    <div id="photoUploadControls" class="flex flex-col items-center">
+                                        <i class="fa-solid fa-camera text-3xl text-emerald-600 mb-2"></i>
+                                        <div class="flex text-xs text-slate-600 justify-center">
+                                            <label for="inputPhotoFile" class="relative cursor-pointer bg-white rounded-md font-semibold text-emerald-700 hover:text-emerald-800 focus-within:outline-none px-2 py-1 border border-emerald-200 shadow-sm">
+                                                <span>Pilih Foto Dokumentasi</span>
+                                                <input id="inputPhotoFile" name="photo" type="file" accept="image/*" class="sr-only" onchange="handlePhotoSelect(event)">
+                                            </label>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 mt-1">Dapat memilih file foto dari galeri atau kamera (Otomatis Di-kompresi)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-1">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Catatan / Keterangan Perkembangan</label>
+                            <textarea id="inputNotes" rows="2" placeholder="Catatan tambahan (contoh: Selesai dibaca mandiri / Khatam juz 2)..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"></textarea>
+                        </div>
+
+                        <div class="pt-3 flex items-center justify-between">
+                            <button type="button" onclick="resetReportForm()" class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
+                                Reset Form
+                            </button>
+                            <button type="submit" id="btnSubmitReport" class="px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm rounded-xl shadow hover:shadow-md transition-all flex items-center space-x-2">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span>Simpan Laporan & Dokumentasi</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- History Log Right Column (1 Col) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                            <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-clock-rotate-left text-emerald-600"></i>
+                                Riwayat Sekolah Ini
+                            </h4>
+                            <span id="schoolLogCount" class="text-xs bg-slate-100 text-slate-600 font-medium px-2 py-0.5 rounded-full">0 Laporan</span>
+                        </div>
+
+                        <div id="recentSchoolLogsList" class="space-y-3 max-h-[460px] overflow-y-auto pr-1">
+                            <p class="text-xs text-slate-400 text-center py-8">Belum ada catatan perkembangan dilaporkan untuk sekolah ini.</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-slate-100 bg-amber-50/60 -mx-6 -mb-6 p-4 rounded-b-2xl border-amber-200/50">
+                        <p class="text-xs text-amber-900 font-medium flex items-center gap-1.5">
+                            <i class="fa-solid fa-camera text-amber-600"></i>
+                            Informasi Dokumentasi:
+                        </p>
+                        <p class="text-[11px] text-amber-800/80 mt-1 leading-relaxed">
+                            Foto kegiatan yang dilampirkan akan tersimpan secara terintegrasi dan ditampilkan di lembar rekapitulasi koordinator.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- ================= TAB 2: REKAPITULASI & DOKUMENTASI ================= -->
+        <section id="sectionRecap" class="hidden space-y-6">
+
+            <!-- Filter & Controls Toolbar -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-5 no-print">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Filter Sekolah</label>
+                        <select id="filterSchool" onchange="applyRecapFilters()" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500">
+                            <option value="ALL">-- Semua 11 Sekolah --</option>
+                            <option value="SDN 1 Lut Tawar">SDN 1 Lut Tawar</option>
+                            <option value="SDN 2 Lut Tawar">SDN 2 Lut Tawar</option>
+                            <option value="SDN 3 Lut Tawar">SDN 3 Lut Tawar</option>
+                            <option value="SDN 4 Lut Tawar">SDN 4 Lut Tawar</option>
+                            <option value="SDN 5 Lut Tawar">SDN 5 Lut Tawar</option>
+                            <option value="SDN 6 Lut Tawar">SDN 6 Lut Tawar</option>
+                            <option value="SDN 7 Lut Tawar">SDN 7 Lut Tawar</option>
+                            <option value="SDN 8 Lut Tawar">SDN 8 Lut Tawar</option>
+                            <option value="SDN 9 Lut Tawar">SDN 9 Lut Tawar</option>
+                            <option value="SDN 10 Lut Tawar">SDN 10 Lut Tawar</option>
+                            <option value="SD Yayasan Pendidikan Islam">SD Yayasan Pendidikan Islam</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Filter Bulan</label>
+                        <select id="filterMonth" onchange="applyRecapFilters()" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500">
+                            <option value="ALL">-- Semua Bulan --</option>
+                            <option value="1">Januari</option>
+                            <option value="2">Februari</option>
+                            <option value="3">Maret</option>
+                            <option value="4">April</option>
+                            <option value="5">Mei</option>
+                            <option value="6">Juni</option>
+                            <option value="7">Juli</option>
+                            <option value="8">Agustus</option>
+                            <option value="9">September</option>
+                            <option value="10">Oktober</option>
+                            <option value="11">November</option>
+                            <option value="12">Desember</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Filter Tahun</label>
+                        <select id="filterYear" onchange="applyRecapFilters()" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500">
+                            <!-- Populated JS -->
+                        </select>
+                    </div>
+
+                    <div class="flex items-end space-x-2">
+                        <button onclick="exportToCSV()" class="flex-1 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-semibold rounded-xl border border-emerald-300 transition-colors flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span>Ekspor Excel</span>
+                        </button>
+                        <button onclick="window.print()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-xl shadow transition-colors flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-print"></i>
+                            <span>Cetak</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Print Header Banner -->
+            <div class="hidden print-only mb-6 text-center border-b-2 border-slate-800 pb-4">
+                <h2 class="text-xl font-bold uppercase tracking-wider">Rekapitulasi Laporan & Dokumentasi Bacaan Al-Qur'an Kepsek</h2>
+                <p class="text-sm">Kecamatan Lut Tawar - Kabupaten Aceh Tengah</p>
+                <p class="text-xs text-slate-500 mt-1" id="printSubTitle">Laporan Resmi Berdasarkan Data Tersimpan</p>
+            </div>
+
+            <!-- Overview Stat Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl font-bold">
+                        <i class="fa-solid fa-school"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-slate-500">Sekolah Aktif Melapor</p>
+                        <h4 id="statActiveSchools" class="text-2xl font-bold text-slate-800">0 / 11</h4>
+                        <p class="text-[11px] text-emerald-600 font-medium mt-0.5">Sekolah terdaftar di Lut Tawar</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-xl font-bold">
+                        <i class="fa-solid fa-file-signature"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-slate-500">Total Entri Laporan</p>
+                        <h4 id="statTotalEntries" class="text-2xl font-bold text-slate-800">0</h4>
+                        <p class="text-[11px] text-blue-600 font-medium mt-0.5">Catatan perkembangan masuk</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-xl font-bold">
+                        <i class="fa-solid fa-images"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-slate-500">Foto Dokumentasi</p>
+                        <h4 id="statTotalPhotos" class="text-2xl font-bold text-slate-800">0 Foto</h4>
+                        <p class="text-[11px] text-purple-600 font-medium mt-0.5">Dokumentasi terlampir</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rekap Per Sekolah Table -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-base">Rekapitulasi Bacaan Terakhir & Foto Per Sekolah</h3>
+                        <p class="text-xs text-slate-500">Ringkasan kemajuan dari masing-masing 11 Kepala Sekolah</p>
+                    </div>
+                    <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-medium">11 Unit Sekolah</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-600 uppercase font-semibold text-[11px] border-b border-slate-200">
+                                <th class="py-3 px-4">No</th>
+                                <th class="py-3 px-4">Dokumentasi</th>
+                                <th class="py-3 px-4">Nama Sekolah</th>
+                                <th class="py-3 px-4">Kepala Sekolah</th>
+                                <th class="py-3 px-4">Laporan Terakhir</th>
+                                <th class="py-3 px-4">Juz / Surah / Ayat</th>
+                                <th class="py-3 px-4">Halaman</th>
+                                <th class="py-3 px-4 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schoolSummaryTableBody" class="divide-y divide-slate-100 text-slate-700">
+                            <!-- Populated dynamic JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Detailed Logs Table -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                <div class="p-5 border-b border-slate-100">
+                    <h3 class="font-bold text-slate-800 text-base">Rincian Seluruh Laporan Bacaan & Dokumentasi</h3>
+                    <p class="text-xs text-slate-500">Daftar kronologis riwayat entri laporan seluruh kepala sekolah</p>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-600 uppercase font-semibold text-[11px] border-b border-slate-200">
+                                <th class="py-3 px-4">Tanggal</th>
+                                <th class="py-3 px-4">Foto</th>
+                                <th class="py-3 px-4">Nama Sekolah</th>
+                                <th class="py-3 px-4">Pelapor</th>
+                                <th class="py-3 px-4">Juz</th>
+                                <th class="py-3 px-4">Surah & Ayat</th>
+                                <th class="py-3 px-4">Halaman</th>
+                                <th class="py-3 px-4">Catatan Perkembangan</th>
+                                <th class="py-3 px-4 text-right no-print">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detailedLogsTableBody" class="divide-y divide-slate-100 text-slate-700">
+                            <!-- Populated dynamic JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Modal Lightbox Pratinjau Foto Dokumentasi -->
+    <div id="imageLightboxModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
+        <div class="relative max-w-3xl w-full bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+            <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
+                <div>
+                    <h4 id="lightboxSchool" class="font-bold text-sm text-emerald-400">SDN 1 Lut Tawar</h4>
+                    <p id="lightboxSub" class="text-xs text-slate-300">Foto Dokumentasi Kegiatan</p>
+                </div>
+                <button onclick="closePhotoModal()" class="text-slate-400 hover:text-white text-lg p-1.5 rounded-full hover:bg-slate-800">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="bg-slate-950 p-2 flex items-center justify-center max-h-[75vh]">
+                <img id="lightboxImage" src="" alt="Dokumentasi Full" class="max-h-[70vh] w-auto object-contain rounded">
+            </div>
+            <div class="p-4 bg-white border-t border-slate-100 flex items-center justify-between">
+                <p id="lightboxNotes" class="text-xs text-slate-600 italic">"Catatan kegiatan"</p>
+                <button onclick="closePhotoModal()" class="px-4 py-2 bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl hover:bg-slate-300">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-12 no-print">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+            <p>Sistem Informasi Laporan Tadarus Al-Qur'an Kepala Sekolah SD • Kecamatan Lut Tawar</p>
+            <p class="mt-1 text-slate-400">Terintegrasi Cloud Database & Foto Realtime</p>
+        </div>
+    </footer>
+
+    <!-- Firebase App & Firestore Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, addDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Predefined list of 11 Schools and PIN Access Codes
+        const SCHOOLS_DATABASE = [
+            { name: "SDN 1 Lut Tawar", pin: "1001" },
+            { name: "SDN 2 Lut Tawar", pin: "1002" },
+            { name: "SDN 3 Lut Tawar", pin: "1003" },
+            { name: "SDN 4 Lut Tawar", pin: "1004" },
+            { name: "SDN 5 Lut Tawar", pin: "1005" },
+            { name: "SDN 6 Lut Tawar", pin: "1006" },
+            { name: "SDN 7 Lut Tawar", pin: "1007" },
+            { name: "SDN 8 Lut Tawar", pin: "1008" },
+            { name: "SDN 9 Lut Tawar", pin: "1009" },
+            { name: "SDN 10 Lut Tawar", pin: "1010" },
+            { name: "SD Yayasan Pendidikan Islam", pin: "1011" }
+        ];
+
+        // Global State
+        let app, db, auth;
+        let currentUser = null;
+        let loggedInSchool = null;
+        let allReports = [];
+        let currentCompressedPhotoBase64 = null; // Temporary photo string
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'lut-tawar-alquran-app';
+        
+        // Initialize Firebase
+        async function initFirebase() {
+            try {
+                const firebaseConfig = typeof __firebase_config !== 'undefined' 
+                    ? JSON.parse(__firebase_config) 
+                    : {
+                        apiKey: "demo-key",
+                        authDomain: "demo-app.firebaseapp.com",
+                        projectId: "demo-app",
+                        storageBucket: "demo-app.appspot.com",
+                        messagingSenderId: "123456789",
+                        appId: "1:123456789:web:abcdef"
+                    };
+
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        currentUser = user;
+                        updateSyncStatus('connected', 'Tersambung ke Cloud');
+                        subscribeToRealtimeReports();
+                    }
+                });
+
+            } catch (err) {
+                console.error("Firebase Auth Error: ", err);
+                updateSyncStatus('error', 'Gagal terhubung ke Cloud storage (Mode Lintas Sesi)');
+            }
+        }
+
+        // Realtime Subscription
+        function subscribeToRealtimeReports() {
+            if (!db) return;
+
+            const reportsCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'quran_reports');
+
+            onSnapshot(reportsCollectionRef, 
+                (snapshot) => {
+                    allReports = [];
+                    snapshot.forEach((doc) => {
+                        allReports.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    allReports.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                    updateSyncStatus('connected', `Tersinkronisasi (${allReports.length} Entri Data)`);
+                    
+                    renderRecentSchoolLogs();
+                    renderRecapDashboard();
+                },
+                (error) => {
+                    console.error("Firestore Listen Error:", error);
+                    updateSyncStatus('error', 'Kesalahan membaca data cloud');
+                }
+            );
+        }
+
+        function updateSyncStatus(type, text) {
+            const spinner = document.getElementById('syncSpinner');
+            const title = document.getElementById('syncStatusTitle');
+            const container = document.getElementById('syncNotification');
+
+            if (type === 'connected') {
+                spinner.className = 'fa-solid fa-cloud-check text-emerald-600 text-lg';
+                title.textContent = text;
+                container.className = 'mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-between shadow-sm no-print';
+            } else if (type === 'error') {
+                spinner.className = 'fa-solid fa-triangle-exclamation text-amber-600 text-lg';
+                title.textContent = text;
+                container.className = 'mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 flex items-center justify-between shadow-sm no-print';
+            }
+        }
+
+        // School Login
+        window.handleSchoolLogin = function(e) {
+            e.preventDefault();
+            const schoolName = document.getElementById('authSchoolSelect').value;
+            const pinInput = document.getElementById('authPinInput').value.trim();
+            const errorMsg = document.getElementById('authErrorMessage');
+
+            const foundSchool = SCHOOLS_DATABASE.find(s => s.name === schoolName);
+
+            if (foundSchool && foundSchool.pin === pinInput) {
+                loggedInSchool = foundSchool;
+                errorMsg.classList.add('hidden');
+                sessionStorage.setItem('lut_tawar_school', JSON.stringify(foundSchool));
+                updateUserInterfaceForAuth();
+            } else {
+                errorMsg.classList.remove('hidden');
+            }
+        };
+
+        window.logoutSchool = function() {
+            loggedInSchool = null;
+            sessionStorage.removeItem('lut_tawar_school');
+            updateUserInterfaceForAuth();
+        };
+
+        function updateUserInterfaceForAuth() {
+            const authCard = document.getElementById('schoolAuthCard');
+            const reportFormContainer = document.getElementById('reportFormContainer');
+            const badge = document.getElementById('authStatusBadge');
+            const badgeSchoolName = document.getElementById('badgeSchoolName');
+            const activeSchoolTag = document.getElementById('activeSchoolTag');
+
+            if (loggedInSchool) {
+                authCard.classList.add('hidden');
+                reportFormContainer.classList.remove('hidden');
+                badge.classList.remove('hidden');
+                badgeSchoolName.textContent = loggedInSchool.name;
+                activeSchoolTag.textContent = loggedInSchool.name;
+
+                renderRecentSchoolLogs();
+            } else {
+                authCard.classList.remove('hidden');
+                reportFormContainer.classList.add('hidden');
+                badge.classList.add('hidden');
+            }
+        }
+
+        // Photo Upload & Compression Handler
+        window.handlePhotoSelect = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                alert('Silakan pilih file berupa gambar/foto.');
+                return;
+            }
+
+            // Compress image to low size Base64 for Firestore Storage
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    // Resize to max 800px width/height maintaining aspect ratio
+                    const maxDim = 800;
+                    if (width > maxDim || height > maxDim) {
+                        if (width > height) {
+                            height = Math.round((height * maxDim) / width);
+                            width = maxDim;
+                        } else {
+                            width = Math.round((width * maxDim) / height);
+                            height = maxDim;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Compress JPEG quality 0.6
+                    currentCompressedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.6);
+
+                    // Update UI Preview
+                    document.getElementById('photoPreviewImg').src = currentCompressedPhotoBase64;
+                    document.getElementById('photoPreviewContainer').classList.remove('hidden');
+                    document.getElementById('photoUploadControls').classList.add('hidden');
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.removeSelectedPhoto = function() {
+            currentCompressedPhotoBase64 = null;
+            document.getElementById('inputPhotoFile').value = '';
+            document.getElementById('photoPreviewImg').src = '';
+            document.getElementById('photoPreviewContainer').classList.add('hidden');
+            document.getElementById('photoUploadControls').classList.remove('hidden');
+        };
+
+        // Submit New Progress Report
+        window.submitReport = async function(e) {
+            e.preventDefault();
+
+            if (!loggedInSchool) {
+                alert('Silakan memilih sekolah dan memasukkan PIN terlebih dahulu.');
+                return;
+            }
+
+            if (!currentUser) {
+                alert('Koneksi database cloud sedang disiapkan. Silakan coba beberapa detik lagi.');
+                return;
+            }
+
+            const btnSubmit = document.getElementById('btnSubmitReport');
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Menyimpan Laporan & Foto...</span>`;
+
+            const date = document.getElementById('inputDate').value;
+            const reporterName = document.getElementById('inputReporterName').value.trim();
+            const juz = parseInt(document.getElementById('inputJuz').value, 10);
+            const surah = document.getElementById('inputSurah').value.trim();
+            const ayatRange = document.getElementById('inputAyatRange').value.trim();
+            const pageRange = document.getElementById('inputPageRange').value.trim() || '-';
+            const notes = document.getElementById('inputNotes').value.trim() || 'Perkembangan bacaan berjalan lancar.';
+
+            const newReport = {
+                schoolName: loggedInSchool.name,
+                reporterName: reporterName,
+                date: date,
+                juz: juz,
+                surah: surah,
+                ayatRange: ayatRange,
+                pageRange: pageRange,
+                notes: notes,
+                photoUrl: currentCompressedPhotoBase64 || null,
+                timestamp: new Date().toISOString()
+            };
+
+            try {
+                const reportsCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'quran_reports');
+                await addDoc(reportsCollectionRef, newReport);
+
+                // Reset form photo & inputs
+                removeSelectedPhoto();
+                document.getElementById('inputSurah').value = '';
+                document.getElementById('inputAyatRange').value = '';
+                document.getElementById('inputPageRange').value = '';
+                document.getElementById('inputNotes').value = '';
+
+                showNotificationModal('Berhasil!', 'Laporan perkembangan dan foto dokumentasi berhasil disimpan ke cloud.');
+            } catch (err) {
+                console.error("Error adding document: ", err);
+                alert("Terjadi kesalahan saat menyimpan data ke cloud.");
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>Simpan Laporan & Dokumentasi</span>`;
+            }
+        };
+
+        // Render logs for logged in school
+        function renderRecentSchoolLogs() {
+            if (!loggedInSchool) return;
+
+            const listContainer = document.getElementById('recentSchoolLogsList');
+            const schoolCountBadge = document.getElementById('schoolLogCount');
+
+            const filtered = allReports.filter(r => r.schoolName === loggedInSchool.name);
+            schoolCountBadge.textContent = `${filtered.length} Laporan`;
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">Belum ada catatan perkembangan dilaporkan untuk ${loggedInSchool.name}.</p>`;
+                return;
+            }
+
+            listContainer.innerHTML = filtered.map(r => `
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs hover:border-emerald-300 transition-colors">
+                    <div class="flex items-center justify-between font-semibold text-slate-700">
+                        <span><i class="fa-solid fa-calendar-day text-emerald-600 mr-1"></i> ${formatDateIndo(r.date)}</span>
+                        <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-[10px]">Juz ${r.juz}</span>
+                    </div>
+                    <div class="flex gap-3 mt-2">
+                        ${r.photoUrl ? `
+                            <img src="${r.photoUrl}" onclick="openPhotoModal('${r.photoUrl}', '${r.schoolName}', 'Juz ${r.juz} - ${r.surah}', '${r.notes}')" alt="Dokumentasi" class="w-14 h-14 object-cover rounded-lg border border-slate-200 cursor-pointer shadow-sm hover:opacity-90">
+                        ` : ''}
+                        <div class="flex-1">
+                            <p class="font-medium text-slate-800">${r.surah} (${r.ayatRange})</p>
+                            <p class="text-slate-500 text-[11px]"><i class="fa-solid fa-book-open text-slate-400"></i> ${r.pageRange}</p>
+                            <p class="text-slate-600 italic mt-1 bg-white p-1.5 rounded border border-slate-100 text-[11px]">"${r.notes}"</p>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-slate-400 text-right mt-1">Oleh: ${r.reporterName}</p>
+                </div>
+            `).join('');
+        }
+
+        // Render Main Recap Tables (Tab 2)
+        function renderRecapDashboard() {
+            const filterSchoolVal = document.getElementById('filterSchool').value;
+            const filterMonthVal = document.getElementById('filterMonth').value;
+            const filterYearVal = document.getElementById('filterYear').value;
+
+            let filtered = [...allReports];
+
+            if (filterSchoolVal !== 'ALL') {
+                filtered = filtered.filter(r => r.schoolName === filterSchoolVal);
+            }
+
+            if (filterMonthVal !== 'ALL') {
+                filtered = filtered.filter(r => {
+                    const d = new Date(r.date);
+                    return (d.getMonth() + 1) === parseInt(filterMonthVal, 10);
+                });
+            }
+
+            if (filterYearVal !== 'ALL') {
+                filtered = filtered.filter(r => {
+                    const d = new Date(r.date);
+                    return d.getFullYear() === parseInt(filterYearVal, 10);
+                });
+            }
+
+            // Update Stats
+            document.getElementById('statTotalEntries').textContent = filtered.length;
+            
+            const activeSchoolNames = new Set(filtered.map(r => r.schoolName));
+            document.getElementById('statActiveSchools').textContent = `${activeSchoolNames.size} / 11`;
+
+            const totalPhotosCount = filtered.filter(r => r.photoUrl).length;
+            document.getElementById('statTotalPhotos').textContent = `${totalPhotosCount} Foto`;
+
+            // Render Table 1: Per School Latest Summary
+            const summaryBody = document.getElementById('schoolSummaryTableBody');
+            summaryBody.innerHTML = SCHOOLS_DATABASE.map((school, index) => {
+                const schoolReports = filtered.filter(r => r.schoolName === school.name);
+                const latest = schoolReports.length > 0 ? schoolReports[0] : null;
+
+                if (latest) {
+                    return `
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="py-3 px-4 font-medium text-slate-500">${index + 1}</td>
+                            <td class="py-3 px-4">
+                                ${latest.photoUrl ? `
+                                    <img src="${latest.photoUrl}" onclick="openPhotoModal('${latest.photoUrl}', '${latest.schoolName}', 'Juz ${latest.juz} - ${latest.surah}', '${latest.notes}')" alt="Dokumentasi" class="w-10 h-10 object-cover rounded-lg border border-slate-200 cursor-pointer shadow-sm hover:scale-105 transition-transform print-photo">
+                                ` : `<span class="text-slate-400 text-xs italic">Tanpa Foto</span>`}
+                            </td>
+                            <td class="py-3 px-4 font-semibold text-slate-800">${school.name}</td>
+                            <td class="py-3 px-4 text-slate-600">${latest.reporterName}</td>
+                            <td class="py-3 px-4 text-slate-500">${formatDateIndo(latest.date)}</td>
+                            <td class="py-3 px-4 font-medium text-emerald-800">
+                                <span class="bg-emerald-100 px-2 py-0.5 rounded text-xs font-semibold mr-1">Juz ${latest.juz}</span>
+                                ${latest.surah} (${latest.ayatRange})
+                            </td>
+                            <td class="py-3 px-4 text-slate-600">${latest.pageRange}</td>
+                            <td class="py-3 px-4 text-center">
+                                <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-semibold">
+                                    <i class="fa-solid fa-circle-check mr-1"></i>Aktif
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    return `
+                        <tr class="hover:bg-slate-50 opacity-60">
+                            <td class="py-3 px-4 text-slate-400">${index + 1}</td>
+                            <td class="py-3 px-4 text-slate-400 italic">-</td>
+                            <td class="py-3 px-4 font-medium text-slate-700">${school.name}</td>
+                            <td class="py-3 px-4 text-slate-400 italic">-</td>
+                            <td class="py-3 px-4 text-slate-400 italic">Belum ada data</td>
+                            <td class="py-3 px-4 text-slate-400 italic">-</td>
+                            <td class="py-3 px-4 text-slate-400 italic">-</td>
+                            <td class="py-3 px-4 text-center">
+                                <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 text-[11px]">
+                                    Belum mengisi
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                }
+            }).join('');
+
+            // Render Table 2: All Detailed Entries
+            const detailBody = document.getElementById('detailedLogsTableBody');
+            if (filtered.length === 0) {
+                detailBody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center py-8 text-slate-400">
+                            Tidak ada data laporan yang sesuai dengan filter.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            detailBody.innerHTML = filtered.map(r => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="py-3 px-4 font-medium text-slate-700 whitespace-nowrap">${formatDateIndo(r.date)}</td>
+                    <td class="py-3 px-4">
+                        ${r.photoUrl ? `
+                            <img src="${r.photoUrl}" onclick="openPhotoModal('${r.photoUrl}', '${r.schoolName}', 'Juz ${r.juz} - ${r.surah}', '${r.notes}')" alt="Dokumentasi" class="w-10 h-10 object-cover rounded-lg border border-slate-200 cursor-pointer shadow-sm hover:scale-105 transition-transform print-photo">
+                        ` : `<span class="text-slate-400 text-xs italic">Tanpa Foto</span>`}
+                    </td>
+                    <td class="py-3 px-4 font-semibold text-slate-800">${r.schoolName}</td>
+                    <td class="py-3 px-4 text-slate-600">${r.reporterName}</td>
+                    <td class="py-3 px-4 font-semibold text-emerald-700">Juz ${r.juz}</td>
+                    <td class="py-3 px-4 font-medium text-slate-800">${r.surah} <span class="text-slate-500 font-normal">(${r.ayatRange})</span></td>
+                    <td class="py-3 px-4 text-slate-600">${r.pageRange}</td>
+                    <td class="py-3 px-4 text-slate-600 text-xs max-w-xs truncate" title="${r.notes}">${r.notes}</td>
+                    <td class="py-3 px-4 text-right no-print">
+                        ${loggedInSchool && loggedInSchool.name === r.schoolName ? `
+                            <button onclick="deleteReport('${r.id}')" class="text-red-500 hover:text-red-700 p-1 rounded transition-colors" title="Hapus Entri Ini">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        ` : '-'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Delete Report Entry
+        window.deleteReport = async function(reportId) {
+            if (!confirm('Apakah Anda yakin ingin menghapus entri laporan ini?')) return;
+
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'quran_reports', reportId);
+                await deleteDoc(docRef);
+                showNotificationModal('Berhasil', 'Entri laporan berhasil dihapus.');
+            } catch (err) {
+                console.error("Error deleting doc: ", err);
+                alert('Gagal menghapus laporan.');
+            }
+        };
+
+        // Lightbox Photo Modal Controls
+        window.openPhotoModal = function(photoUrl, schoolName, subText, notes) {
+            document.getElementById('lightboxImage').src = photoUrl;
+            document.getElementById('lightboxSchool').textContent = schoolName;
+            document.getElementById('lightboxSub').textContent = subText;
+            document.getElementById('lightboxNotes').textContent = `"${notes || 'Dokumentasi Kegiatan'}"`;
+            document.getElementById('imageLightboxModal').classList.remove('hidden');
+        };
+
+        window.closePhotoModal = function() {
+            document.getElementById('imageLightboxModal').classList.add('hidden');
+        };
+
+        // Window UI Helper functions
+        window.switchTab = function(tabName) {
+            const inputSec = document.getElementById('sectionInput');
+            const recapSec = document.getElementById('sectionRecap');
+            const inputBtn = document.getElementById('tabInputBtn');
+            const recapBtn = document.getElementById('tabRecapBtn');
+
+            if (tabName === 'input') {
+                inputSec.classList.remove('hidden');
+                recapSec.classList.add('hidden');
+
+                inputBtn.className = "px-5 py-3 text-sm font-medium text-amber-300 border-b-2 border-amber-400 flex items-center space-x-2 transition-all";
+                recapBtn.className = "px-5 py-3 text-sm font-medium text-emerald-200 hover:text-white border-b-2 border-transparent flex items-center space-x-2 transition-all";
+            } else {
+                inputSec.classList.add('hidden');
+                recapSec.classList.remove('hidden');
+
+                recapBtn.className = "px-5 py-3 text-sm font-medium text-amber-300 border-b-2 border-amber-400 flex items-center space-x-2 transition-all";
+                inputBtn.className = "px-5 py-3 text-sm font-medium text-emerald-200 hover:text-white border-b-2 border-transparent flex items-center space-x-2 transition-all";
+
+                renderRecapDashboard();
+            }
+        };
+
+        window.applyRecapFilters = function() {
+            renderRecapDashboard();
+        };
+
+        // Export to Native Excel (.xlsx) with Embedded Real Images using ExcelJS
+        window.exportToCSV = async function() {
+            // Re-apply filters to get currently viewed data
+            const filterSchoolVal = document.getElementById('filterSchool').value;
+            const filterMonthVal = document.getElementById('filterMonth').value;
+            const filterYearVal = document.getElementById('filterYear').value;
+
+            let filtered = [...allReports];
+
+            if (filterSchoolVal !== 'ALL') {
+                filtered = filtered.filter(r => r.schoolName === filterSchoolVal);
+            }
+            if (filterMonthVal !== 'ALL') {
+                filtered = filtered.filter(r => {
+                    const d = new Date(r.date);
+                    return (d.getMonth() + 1) === parseInt(filterMonthVal, 10);
+                });
+            }
+            if (filterYearVal !== 'ALL') {
+                filtered = filtered.filter(r => {
+                    const d = new Date(r.date);
+                    return d.getFullYear() === parseInt(filterYearVal, 10);
+                });
+            }
+
+            if (filtered.length === 0) {
+                alert('Belum ada data laporan yang sesuai dengan filter untuk diekspor.');
+                return;
+            }
+
+            // Month labels lookup
+            const monthNames = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            const selectedMonthLabel = filterMonthVal !== 'ALL' ? monthNames[parseInt(filterMonthVal)] : "Semua Bulan";
+            const selectedSchoolLabel = filterSchoolVal !== 'ALL' ? filterSchoolVal : "Semua 11 Sekolah";
+            const selectedYearLabel = filterYearVal !== 'ALL' ? filterYearVal : "Semua Tahun";
+
+            // Create ExcelJS Workbook & Worksheet
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Rekap Bacaan');
+
+            // Set Column Definitions & Widths
+            worksheet.columns = [
+                { header: 'No', key: 'no', width: 6 },
+                { header: 'Foto Dokumentasi', key: 'photo', width: 18 },
+                { header: 'Tanggal', key: 'date', width: 16 },
+                { header: 'Nama Sekolah', key: 'school', width: 28 },
+                { header: 'Nama Kepala Sekolah', key: 'reporter', width: 24 },
+                { header: 'Juz', key: 'juz', width: 10 },
+                { header: 'Surah', key: 'surah', width: 20 },
+                { header: 'Ayat', key: 'ayat', width: 16 },
+                { header: 'Halaman', key: 'page', width: 16 },
+                { header: 'Catatan Perkembangan', key: 'notes', width: 35 }
+            ];
+
+            // Add Header Banner Rows at Top
+            worksheet.spliceRows(1, 0,
+                ["REKAPITULASI LAPORAN & DOKUMENTASI BACAAN AL-QUR'AN KEPALA SEKOLAH"],
+                ["KECAMATAN LUT TAWAR - KABUPATEN ACEH TENGAH"],
+                [],
+                ["Filter Sekolah:", selectedSchoolLabel, "", "Periode Bulan:", selectedMonthLabel],
+                ["Tahun:", selectedYearLabel, "", "Total Laporan:", filtered.length + " Entri"],
+                ["Tanggal Unduh:", new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })],
+                []
+            );
+
+            // Merge Header Title Rows
+            worksheet.mergeCells('A1:J1');
+            worksheet.mergeCells('A2:J2');
+            worksheet.getCell('A1').font = { bold: true, size: 14 };
+            worksheet.getCell('A2').font = { bold: true, size: 11 };
+
+            // Table Header is at Row 8 after header banner
+            const headerRowIndex = 8;
+            const headerRow = worksheet.getRow(headerRowIndex);
+            headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+            headerRow.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FF047857' } // Emerald 700
+            };
+            headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+
+            // Add Data Rows & Embed Images
+            for (let i = 0; i < filtered.length; i++) {
+                const r = filtered[i];
+                const rowIndex = headerRowIndex + 1 + i;
+                const row = worksheet.getRow(rowIndex);
+
+                // Set Height for Image fit
+                row.height = 65;
+                row.alignment = { vertical: 'middle', wrapText: true };
+
+                row.getCell(1).value = i + 1; // No
+                row.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' };
+                row.getCell(2).value = r.photoUrl ? '' : 'Tanpa Foto'; // Foto cell
+                row.getCell(2).alignment = { vertical: 'middle', horizontal: 'center' };
+                row.getCell(3).value = formatDateIndo(r.date);
+                row.getCell(4).value = r.schoolName || '-';
+                row.getCell(5).value = r.reporterName || '-';
+                row.getCell(6).value = `Juz ${r.juz}`;
+                row.getCell(7).value = r.surah || '-';
+                row.getCell(8).value = r.ayatRange || '-';
+                row.getCell(9).value = r.pageRange || '-';
+                row.getCell(10).value = r.notes || '-';
+
+                // If Base64 Photo exists, embed real image into column 2 (B)
+                if (r.photoUrl) {
+                    try {
+                        const imageId = workbook.addImage({
+                            base64: r.photoUrl,
+                            extension: 'jpeg',
+                        });
+
+                        // Position image nicely in Column B of the row
+                        worksheet.addImage(imageId, {
+                            tl: { col: 1.1, row: rowIndex - 1 + 0.1 },
+                            ext: { width: 95, height: 75 },
+                            editAs: 'oneCell'
+                        });
+                    } catch (err) {
+                        console.error("Error embedding image into excel cell:", err);
+                        row.getCell(2).value = "Foto Eror";
+                    }
+                }
+            }
+
+            // Export & Download File using FileSaver
+            const buffer = await workbook.xlsx.writeBuffer();
+            const fileName = `Rekap_Bacaan_AlQuran_LutTawar_${selectedMonthLabel}_${selectedYearLabel}.xlsx`.replace(/\s+/g, '_');
+            saveAs(new Blob([buffer], { type: "application/octet-stream" }), fileName);
+        };
+
+        window.resetReportForm = function() {
+            document.getElementById('readingReportForm').reset();
+            removeSelectedPhoto();
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('inputDate').value = today;
+        };
+
+        function showNotificationModal(title, msg) {
+            alert(`${title}: ${msg}`);
+        }
+
+        function formatDateIndo(dateStr) {
+            if (!dateStr) return '-';
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return dateStr;
+            const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agus", "Sep", "Okt", "Nov", "Des"];
+            const year = parts[0];
+            const monthIdx = parseInt(parts[1], 10) - 1;
+            const day = parseInt(parts[2], 10);
+            return `${day} ${months[monthIdx]} ${year}`;
+        }
+
+        // Initialize App & Populate Select Options on DOM Loaded
+        window.addEventListener('DOMContentLoaded', () => {
+            // Populate Juz dropdown 1-30
+            const juzSelect = document.getElementById('inputJuz');
+            for (let i = 1; i <= 30; i++) {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = `Juz ${i}`;
+                juzSelect.appendChild(opt);
+            }
+
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('inputDate').value = today;
+
+            // Populate Year filter options
+            const yearSelect = document.getElementById('filterYear');
+            const currentYear = new Date().getFullYear();
+            yearSelect.innerHTML = `<option value="ALL">-- Semua Tahun --</option>`;
+            for (let y = currentYear; y >= currentYear - 3; y--) {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                yearSelect.appendChild(opt);
+            }
+
+            // Check cached school session
+            const savedSchool = sessionStorage.getItem('lut_tawar_school');
+            if (savedSchool) {
+                try {
+                    loggedInSchool = JSON.parse(savedSchool);
+                } catch (e) {
+                    sessionStorage.removeItem('lut_tawar_school');
+                }
+            }
+            updateUserInterfaceForAuth();
+
+            // Initialize Firebase
+            initFirebase();
+        });
+    </script>
+</body>
+</html>
